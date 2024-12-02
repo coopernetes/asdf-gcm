@@ -75,8 +75,8 @@ download_release() {
 	version="$1"
 	filename="$2"
 	platform=$(get_platform)
-
-	url="$GH_REPO/releases/download/v${version}/${filename}"
+	download_filename="$TOOL_NAME-$platform$ASDF_INSTALL_VERSION.tar.gz"
+	url="$GH_REPO/releases/download/v${version}/${download_filename}"
 
 	echo "* Downloading $TOOL_NAME release $version..."
 	curl "${curl_opts[@]}" -o "$filename" -C - "$url" || fail "Could not download $url"
