@@ -36,13 +36,47 @@ list_all_versions() {
 	list_github_tags
 }
 
+get_osx_arch() {
+	local machine_hardware_name
+	machine_hardware_name="$(uname -m)"
+
+	case "$machine_hardware_name" in
+	'x86_64') local arch="x64" ;;
+	'aarch64') local arch="arm64" ;;
+	*) local arch="$machine_hardware_name" ;;
+	esac
+
+	echo "${arch}"
+}
+
+get_platform() {
+	local os
+	os=$(uname | tr '[:upper:]' '[:lower:]')
+
+	case "$os" in
+	linux*)
+		local platform="linux_amd64."
+		;;
+	darwin*)
+		local arch
+		arch=$(get_osx_arch)
+		local platform="osx-${arch}-"
+		;;
+	*)
+		local platform=notset
+		;;
+	esac
+
+	echo "${platform}"
+}
+
 download_release() {
-	local version filename url
+	local version filename url platform
 	version="$1"
 	filename="$2"
+	platform=$(get_platform)
 
-	# TODO: Adapt the release URL convention for gcm
-	url="$GH_REPO/archive/v${version}.tar.gz"
+	url="$GH_REPO/releases/download/v${version}/${filename}"
 
 	echo "* Downloading $TOOL_NAME release $version..."
 	curl "${curl_opts[@]}" -o "$filename" -C - "$url" || fail "Could not download $url"
