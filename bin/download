@@ -1,0 +1,58 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+current_script_path=${BASH_SOURCE[0]}
+plugin_dir=$(dirname "$(dirname "$current_script_path")")
+
+# shellcheck source=./lib/utils.bash
+source "${plugin_dir}/lib/utils.bash"
+
+mkdir -p "$ASDF_DOWNLOAD_PATH"
+
+get_osx_arch() {
+  local machine_hardware_name
+  machine_hardware_name="$(uname -m)"
+
+  case "$machine_hardware_name" in
+    'x86_64') local arch="x64" ;;
+    'aarch64') local arch="arm64" ;;
+    *) local arch="$machine_hardware_name" ;;
+  esac
+
+  echo "${arch}"
+}
+
+get_platform() {
+  local os
+  os=$(uname | tr '[:upper:]' '[:lower:]')
+
+  case "$os" in
+    linux*)
+      local platform="linux_amd64."
+      ;;
+    darwin*)
+      local arch
+      arch=$(get_osx_arch)
+      local platform="osx-${arch}-"
+      ;;
+    *)
+      local platform=notset
+      ;;
+  esac
+
+  echo "${platform}"
+}
+
+platform=$(get_platform)
+
+release_file="$ASDF_DOWNLOAD_PATH/$TOOL_NAME-$platform$ASDF_INSTALL_VERSION.tar.gz"
+
+# Download tar.gz file to the download directory
+download_release "$ASDF_INSTALL_VERSION" "$release_file"
+
+#  Extract contents of tar.gz file into the download directory
+tar -xzf "$release_file" -C "$ASDF_DOWNLOAD_PATH" --strip-components=1 || fail "Could not extract $release_file"
+
+# Remove the tar.gz file since we don't need to keep it
+rm "$release_file"
