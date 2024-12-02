@@ -4,6 +4,8 @@
 
 [git-credential-manager](https://github.com/git-ecosystem/git-credential-manager) plugin for the [asdf version manager](https://asdf-vm.com).
 
+Tested on Fedora Linux but not on MacOS. YMMV.
+
 </div>
 
 # Contents
